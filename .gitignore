@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# Work directories the scripts stage output into
+ai-*/
+vi-*/
+articleingest-*/
+videoingest-*/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini

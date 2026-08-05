@@ -1,0 +1,20 @@
+# Dependencies for both skills. Each is imported lazily, only when a source of
+# the matching type shows up -- so an install missing one of these still works
+# for every other source type, and says exactly what to install when it doesn't.
+
+# article-ingest
+requests>=2.31          # fetching URLs, and detecting a link straight at a PDF
+trafilatura>=2.0        # web article extraction
+pymupdf>=1.24           # PDF text, metadata, and page rendering
+python-docx>=1.1        # .docx
+EbookLib>=0.18          # .epub
+
+# video-ingest
+# Only needed when a source has no captions and must be transcribed locally.
+# Pulls in torch-sized wheels; skip it if you only ingest captioned video.
+faster-whisper>=1.0
+
+# video-ingest also needs two external binaries, not pip packages:
+#   ffmpeg  -- frame extraction and audio conversion
+#   yt-dlp  -- resolving and downloading remote video
+# See README.md for per-platform install commands.
