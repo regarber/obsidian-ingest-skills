@@ -1,4 +1,19 @@
+<div align="center">
+
 # obsidian-ingest-skills
+
+**Turn an article or a video into atomic, linked, citable notes — not a summary.**
+
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Claude Code](https://img.shields.io/badge/Claude%20Code-skills-D97757.svg)](https://claude.com/claude-code)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org)
+[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey.svg)](#install)
+[![Vault](https://img.shields.io/badge/vault-plain%20Markdown-7C3AED.svg)](#configuration)
+[![Extraction](https://img.shields.io/badge/extraction-runs%20locally-2EA043.svg)](#privacy)
+
+</div>
+
+---
 
 Two [Claude Code](https://claude.com/claude-code) skills that turn sources into
 atomic, linked notes in a Markdown vault — one for written material, one for
@@ -14,6 +29,34 @@ page or timestamp it came from.
 | `article-ingest` | Web URLs, PDFs (papers and scans), `.docx`, `.epub`, saved HTML, Markdown, plain text |
 | `video-ingest` | Anything `yt-dlp` can reach, plus local video and audio files |
 
+## What it produces
+
+A two-hour talk on system design goes in. What comes out is not a chapter
+summary — it is the handful of ideas that survive away from the source, each one
+findable a year later by someone who has forgotten the talk entirely:
+
+```markdown
+---
+type: claim
+source: "[[system-design-explained]]"
+at: "01:23:59"
+ingested: 2026-08-06
+---
+
+# JWT, OAuth 2, and SSO are not authentication methods
+
+Four category errors, named together because they share one cause. **JWT is a
+token format** — a signed JSON object, not a way of verifying anyone. **OAuth 2
+is an authorization framework** — it answers what an app may access on your
+behalf, never who you are. **SSO is a user-experience pattern**…
+
+Source: [[system-design-explained]] at [01:23:59](https://youtu.be/…&t=5039s)
+```
+
+The title is the claim, so search ranks on it and a citation displays it. The
+`at:` field is a timestamp you can click. And the source note filed alongside it
+records what was *not* worth keeping, which is most of it.
+
 ## What you get per source
 
 - **One source note** in `Sources/` — an index of the argument, with a structure
@@ -22,7 +65,19 @@ page or timestamp it came from.
   as a claim, each citing `p. 7` or `[04:12]` so it stays checkable.
 - **Figures and frames worth keeping**, copied into the vault and embedded. Only
   the ones actually referenced.
+- **The raw capture**, archived unedited in `RAW_DIR` so the citation stays
+  checkable after the original moves.
 
+## Not filing is a result
+
+The most valuable thing either skill does on a mediocre source is decline. Both
+check the vault before writing and are explicit that **filing nothing is a valid
+outcome** when the vault already covers the material better — a filler note is
+not free, it competes with a real one in every future search.
+
+That check happens twice on purpose. Once cheaply against the title before
+reading (step 1b), so you learn a source is redundant *before* paying to read
+it, and once properly against the argument before writing (step 4).
 ## Why claims, not summaries
 
 The note title is what search ranks on and what a citation displays. A note
@@ -85,6 +140,7 @@ Both skills read a small table at the top of their `SKILL.md`:
 | `SOURCES_DIR` | yes | Where source notes are written |
 | `ATTACHMENTS_DIR` | yes | Where kept figures and frames are copied |
 | `PYTHON` | yes | Interpreter holding the dependencies |
+| `RAW_DIR` | no | Where the unedited capture is archived |
 | `SEARCH_CMD` | no | Command that searches the vault before writing |
 | `INDEX_CMD` | no | Command that reindexes the vault after writing |
 
@@ -92,6 +148,15 @@ Both skills read a small table at the top of their `SKILL.md`:
 them empty for a plain Obsidian vault — the search step falls back to Grep, and
 the reindex step is skipped.
 
+## The raw archive
+
+A claim note is an interpretation. The `at:` field keeps it checkable — but only
+while the original is still reachable, and deleted posts and unlisted videos take
+the evidence with them.
+
+So step 5b copies the extracted text or transcript into `RAW_DIR` under the same
+slug as the source note. Never edited, never indexed: it exists to be audited,
+not retrieved. A corrected archive is no longer evidence.
 ## How it is split
 
 The Python scripts do the mechanical half and nothing else: resolve the source,
@@ -129,6 +194,12 @@ Prefers platform captions over ASR (free, exact, and better), falling back to
 `faster-whisper` locally when there are none. YouTube's rolling auto-captions
 repeat the tail of each cue so the text appears to scroll; those are collapsed
 back into readable prose before anything downstream sees them.
+
+Frames are flagged `likely_blank` when they fall in the bottom decile by JPEG
+size — at fixed quality a fade or title card compresses to almost nothing, while
+a dense slide does not. Scene detection fires on transitions as readily as on
+content, and opening one of those costs real tokens to learn nothing. It is a
+hint, not a verdict: nothing is deleted, and the flag is suppressed on short runs.
 
 Frames come from ffmpeg scene detection with a periodic floor, because scene
 detection alone has a blind spot: a fixed camera pointed at a whiteboard never
