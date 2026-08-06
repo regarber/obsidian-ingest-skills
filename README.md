@@ -68,12 +68,35 @@ records what was *not* worth keeping, which is most of it.
 - **The raw capture**, archived unedited in `RAW_DIR` so the citation stays
   checkable after the original moves.
 
+## Where the tokens go
+
+Reading the source properly is the expensive step, and it is the one worth
+paying for every time — the claims worth keeping are usually asides, not the
+stated thesis, so skimming produces exactly the generic notes this repo exists
+to avoid.
+
+Everything around that step is built to not spend tokens that do not earn their
+place:
+
+- **The vault is checked before the read, not after** (step 1b). A source the
+  vault already covers is read for deltas or dropped, instead of being read in
+  full and then discovered to be redundant.
+- **Blank frames are flagged, not opened** (`likely_blank`). Scene detection
+  fires on fades and title cards as readily as on slides. Measured over a 3h41m
+  tutorial: transitions landed at 4.5–4.9 KB against a 36.5 KB median and 54.7 KB
+  for an architecture diagram. Opening one costs real tokens to learn nothing.
+- **Vision is selective.** Only pages and frames whose meaning lives in pixels
+  are rendered at all, and only the ones actually referenced are kept.
+- **Filing nothing is a valid outcome**, so a weak source ends in a short report
+  rather than five notes nobody will ever want.
+
+The result is that cost tracks how much a source is *worth*, not how long it is.
+
 ## Not filing is a result
 
-The most valuable thing either skill does on a mediocre source is decline. Both
-check the vault before writing and are explicit that **filing nothing is a valid
-outcome** when the vault already covers the material better — a filler note is
-not free, it competes with a real one in every future search.
+The most valuable thing either skill does on a mediocre source is decline. A
+filler note is not free: it competes with a real one in every future search, and
+a vault that grows without getting better is just a slower search index.
 
 That check happens twice on purpose. Once cheaply against the title before
 reading (step 1b), so you learn a source is redundant *before* paying to read
