@@ -25,6 +25,7 @@ machine-specific values — nothing else in the skill hardcodes a path.
 | `ATTACHMENTS_DIR` | `<VAULT_ROOT>/_attachments` | Where kept figures are copied |
 | `PYTHON` | `python3` | Interpreter that has this skill's dependencies |
 | `SEARCH_CMD` | *(optional)* | Command that searches the vault — see step 4 |
+| `RAW_DIR` | `<VAULT_ROOT>/_raw` | Where the unedited capture is archived — see step 5b |
 | `INDEX_CMD` | *(optional)* | Command that reindexes the vault — see step 6 |
 
 `PYTHON` must be the interpreter the dependencies were installed into. If a
@@ -77,9 +78,28 @@ fall back to it:
 paywalled and they have no subscription, say so and stop — do not look for a way
 around it.
 
+## Step 1b — Ask the vault what it already knows
+
+Before reading anything, run one search on the title and main topic:
+
+```bash
+<SEARCH_CMD> "<title or main topic>"
+```
+
+(No `SEARCH_CMD`? Grep `VAULT_ROOT` for the two or three obvious terms instead.)
+
+A few hundred tokens, and it changes how you read. A source on ground the vault
+already holds should be read for **deltas** — what is new, sharper, or in
+conflict. A source on new ground should be read cold.
+
+This does not replace step 4, which is done properly once you know what the
+source actually argues. It stops you paying to read a whole document before
+discovering the vault covered it better last week.
+
 ## Step 2 — Read the article
 
-Read `article.md` in full. Not a skim.
+Read `article.md` in full. Not a skim. This is the one cost worth paying
+every time; the savings elsewhere exist so this one stays affordable.
 
 Note the position markers, which are what make a claim checkable later:
 
@@ -211,7 +231,7 @@ Non-negotiables:
 How many claim notes: usually **3-8** for a long-form article or paper, **2-5**
 for a blog post, **1-3** for a short piece. Driven by content, not length. Do
 not manufacture claims to hit a number — filler notes degrade retrieval by
-crowding out real hits.
+crowding out real hits. **Filing nothing is a valid outcome** when the vault already covers the source better; say so in the report.
 
 ### Figures worth keeping
 
@@ -224,6 +244,28 @@ If a figure carries information the text cannot, copy that rendered page to
 
 Only referenced figures. Unreferenced images are clutter, and most indexers
 ignore them anyway.
+
+## Step 5b — Archive the raw capture
+
+Copy the extracted text into the vault, under the same `<slug>` as the source
+note:
+
+```bash
+cp <work-dir>/article.md <RAW_DIR>/<slug>.md
+```
+
+Why this is not optional: a claim note is **your interpretation** of the source.
+The `at:` field makes it checkable — but only while the original is still
+reachable, and a deleted post, an unlisted video, or a reorganised site takes the
+evidence with it. The work dir is scratch and gets wiped.
+
+**Never edit anything in `<RAW_DIR>`.** Not to fix a typo, not to trim it. A
+corrected archive is no longer evidence of what the source said; note the
+correction in the source note, where it belongs.
+
+If the vault is backed by a retrieval index, exclude `<RAW_DIR>` from it. The
+archive exists to be audited, not retrieved — indexing it puts verbose source
+text in competition with the notes that distil it.
 
 ## Step 6 — Reindex
 
@@ -248,8 +290,9 @@ useful part — they are what the user will search for later.
 
 - **Do not summarize the article.** A summary is a worse copy of the source.
   Extract claims that stand on their own away from it.
-- **Do not file the full text into the vault.** It lives in the work dir. The
-  source note carries the structure; the full text would swamp every search.
+- **Do not file the full text into the indexed vault.** The archive is
+  `<RAW_DIR>`; the source note carries the structure. Full text in the index
+  would swamp every search.
 - **Do not overwrite an existing note** whose title collides. Read it first,
   then either extend it or pick a sharper title.
 - **Do not invent page numbers.** Every `at:` must come from a position marker
@@ -257,5 +300,3 @@ useful part — they are what the user will search for later.
 - **Do not trust a thin extraction.** If `thin_extraction` is true, you are
   probably reading a paywall stub, not the article. Check before writing notes
   from it.
-- **Do not skip step 6** if an index command is configured. An unindexed note
-  does not exist.

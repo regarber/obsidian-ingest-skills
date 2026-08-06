@@ -24,6 +24,7 @@ machine-specific values — nothing else in the skill hardcodes a path.
 | `ATTACHMENTS_DIR` | `<VAULT_ROOT>/_attachments` | Where kept frames are copied |
 | `PYTHON` | `python3` | Interpreter that has this skill's dependencies |
 | `SEARCH_CMD` | *(optional)* | Command that searches the vault — see step 4 |
+| `RAW_DIR` | `<VAULT_ROOT>/_raw` | Where the unedited capture is archived — see step 5b |
 | `INDEX_CMD` | *(optional)* | Command that reindexes the vault — see step 6 |
 
 `PYTHON` must be the interpreter `faster-whisper` was installed into. If a
@@ -73,16 +74,44 @@ It prints a JSON summary and writes `meta.json`, `transcript.md`, `transcript.js
 command. A source with no captions and no speech is a real dead end — say so rather
 than filing an empty note.
 
+## Step 1b — Ask the vault what it already knows
+
+Before reading anything, run one search on the title and main topic:
+
+```bash
+<SEARCH_CMD> "<title or main topic>"
+```
+
+(No `SEARCH_CMD`? Grep `VAULT_ROOT` for the two or three obvious terms instead.)
+
+A few hundred tokens, and it changes how you read. A source on ground the vault
+already holds should be read for **deltas** — what is new, sharper, or in
+conflict. A source on new ground should be read cold.
+
+This does not replace step 4, which is done properly once you know what the
+source actually argues. It stops you paying to read a whole document before
+discovering the vault covered it better last week.
+
 ## Step 2 — Read the transcript
 
 Read `transcript.md` in full. Not a skim — the claims worth keeping are usually
-asides, not the stated thesis.
+asides, not the stated thesis. This is the one cost worth paying every time;
+the savings elsewhere exist so this one stays affordable.
 
 ## Step 3 — Vision pass
 
 Read `frames.json`, then use the Read tool on the frames worth looking at. Do not
 open all forty reflexively; the transcript tells you which timestamps had something
 on screen worth seeing.
+
+Each entry carries `bytes` and, on runs of ten frames or more, `likely_blank`.
+**Skip anything flagged `likely_blank`** — those are the bottom decile by file
+size, which at fixed JPEG quality means a fade, a title card, or a near-black
+transition. A scene-change detector fires on those exactly as readily as on a
+slide, and opening one costs a thousand-plus tokens to learn nothing.
+
+It is a hint, not a verdict. A dark screenshot with real content can sit
+mid-pack, so weigh it against what the transcript says was happening.
 
 Look for what the audio cannot carry:
 
@@ -193,7 +222,7 @@ Non-negotiables:
 How many claim notes: usually **3-8** for a conference talk, **2-4** for a meeting.
 Driven by content, not length. A video with one good idea gets one note. Do not
 manufacture claims to hit a number — filler notes actively degrade retrieval by
-crowding out real hits.
+crowding out real hits. **Filing nothing is a valid outcome** when the vault already covers the source better; say so in the report.
 
 ### Frames worth keeping
 
@@ -206,6 +235,31 @@ frame to `<ATTACHMENTS_DIR>/video-frames/<slug>/` and embed it:
 
 Only referenced frames. Unreferenced images are clutter, and most indexers ignore
 them anyway.
+
+## Step 5b — Archive the raw capture
+
+Copy the extracted transcript into the vault, under the same `<slug>` as the source
+note:
+
+```bash
+cp <work-dir>/transcript.md <RAW_DIR>/<slug>.md
+```
+
+Why this is not optional: a claim note is **your interpretation** of the source.
+The `at:` field makes it checkable — but only while the original is still
+reachable, and a deleted post, an unlisted video, or a reorganised site takes the
+evidence with it. The work dir is scratch and gets wiped.
+
+**Never edit anything in `<RAW_DIR>`.** Not to fix a typo, not to trim it. A
+corrected archive is no longer evidence of what the source said; note the
+correction in the source note, where it belongs.
+
+Frames are not archived: they are large, and the transcript plus the source
+note's **On screen** section already record what they showed.
+
+If the vault is backed by a retrieval index, exclude `<RAW_DIR>` from it. The
+archive exists to be audited, not retrieved — indexing it puts verbose source
+text in competition with the notes that distil it.
 
 ## Step 6 — Reindex
 
@@ -230,11 +284,10 @@ of the report — they are what the user will actually search for later.
 
 - **Do not summarize the video.** A summary is a worse copy of the transcript. Extract
   claims that stand on their own away from the source.
-- **Do not file the transcript into the vault.** It lives in the work dir. The source
-  note carries the timeline; the full text would swamp every embedding search.
+- **Do not file the transcript into the indexed vault.** The archive is
+  `<RAW_DIR>`; the source note carries the timeline. Full text in the index would
+  swamp every embedding search.
 - **Do not overwrite an existing note** whose title collides. Read it first, then
   either extend it or pick a sharper title for the new claim.
 - **Do not invent timestamps.** Every `at:` must come from `transcript.json` or
   `frames.json`.
-- **Do not skip step 6** if an index command is configured. An unindexed note does
-  not exist.
